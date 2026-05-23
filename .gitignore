@@ -1,0 +1,30 @@
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# Build
+backend/target/
+frontend/node_modules/
+frontend/dist/
+
+# Environment
+.env.local
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Python
+notification-service/__pycache__/
+notification-service/*.pyc
+notification-service/.venv/
+
+# Database
+backend/data/
+*.mv.db
+*.trace.db
+*.db
+
+# Temp files
+tmp_rabbitmq_releases.txt

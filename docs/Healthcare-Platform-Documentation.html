@@ -1,0 +1,1063 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Healthcare Appointment Platform - Complete Documentation</title>
+<style>
+  @page { margin: 1.5cm; size: A4; }
+  * { box-sizing: border-box; }
+  body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; line-height: 1.6; color: #333; max-width: 900px; margin: 0 auto; padding: 20px; }
+  h1 { color: #1a56db; border-bottom: 3px solid #1a56db; padding-bottom: 10px; page-break-before: auto; }
+  h2 { color: #1e40af; border-bottom: 1px solid #ddd; padding-bottom: 5px; margin-top: 30px; page-break-before: auto; }
+  h3 { color: #374151; margin-top: 20px; }
+  h4 { color: #4b5563; }
+  table { border-collapse: collapse; width: 100%; margin: 10px 0; font-size: 14px; }
+  th, td { border: 1px solid #d1d5db; padding: 8px 12px; text-align: left; }
+  th { background-color: #eff6ff; color: #1e40af; font-weight: 600; }
+  tr:nth-child(even) { background-color: #f9fafb; }
+  code { background: #f3f4f6; padding: 2px 6px; border-radius: 4px; font-family: 'Consolas', 'Courier New', monospace; font-size: 13px; }
+  pre { background: #1f2937; color: #e5e7eb; padding: 16px; border-radius: 8px; overflow-x: auto; font-size: 13px; line-height: 1.5; }
+  pre code { background: none; color: inherit; padding: 0; }
+  .badge { display: inline-block; padding: 2px 10px; border-radius: 12px; font-size: 12px; font-weight: 600; }
+  .badge-blue { background: #dbeafe; color: #1e40af; }
+  .badge-green { background: #d1fae5; color: #065f46; }
+  .badge-red { background: #fee2e2; color: #991b1b; }
+  .badge-yellow { background: #fef3c7; color: #92400e; }
+  .badge-purple { background: #ede9fe; color: #5b21b6; }
+  .info-box { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 12px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .warn-box { background: #fffbeb; border-left: 4px solid #f59e0b; padding: 12px 16px; margin: 12px 0; border-radius: 0 8px 8px 0; }
+  .section { margin-bottom: 30px; }
+  .arch-diagram { background: #f9fafb; border: 1px solid #e5e7eb; padding: 20px; border-radius: 8px; font-family: monospace; white-space: pre; line-height: 1.4; }
+  .toc a { text-decoration: none; color: #1e40af; }
+  .toc a:hover { text-decoration: underline; }
+  .toc li { margin: 4px 0; }
+  .page-break { page-break-before: always; }
+  .cover { text-align: center; padding: 60px 0; }
+  .cover h1 { font-size: 36px; border: none; }
+  .cover p { font-size: 18px; color: #6b7280; }
+  .flow-step { display: inline-block; background: #eff6ff; border: 1px solid #bfdbfe; padding: 4px 12px; border-radius: 6px; margin: 2px; font-size: 13px; }
+  .arrow { display: inline-block; margin: 0 4px; color: #6b7280; }
+</style>
+</head>
+<body>
+
+<!-- COVER PAGE -->
+<div class="cover">
+  <h1>🏥 Healthcare Appointment Platform</h1>
+  <p><strong>Complete Technical Documentation</strong></p>
+  <p>Spring Boot &bull; Python &bull; RabbitMQ &bull; React &bull; Docker</p>
+  <br><br>
+  <table style="width:60%;margin:auto;border:none;">
+    <tr><td style="border:none;text-align:right;color:#6b7280;">Version:</td><td style="border:none;">1.0.0</td></tr>
+    <tr><td style="border:none;text-align:right;color:#6b7280;">Date:</td><td style="border:none;">May 2026</td></tr>
+    <tr><td style="border:none;text-align:right;color:#6b7280;">Stack:</td><td style="border:none;">Spring Boot 3.2 + Python 3.11 + React 18</td></tr>
+  </table>
+</div>
+
+<!-- TABLE OF CONTENTS -->
+<div class="page-break"></div>
+<h1>📑 Table of Contents</h1>
+<ol class="toc" style="font-size:15px;">
+  <li><a href="#architecture">Architecture Overview</a></li>
+  <li><a href="#tech-stack">Technology Stack</a></li>
+  <li><a href="#project-structure">Project Structure</a></li>
+  <li><a href="#database">Database Schema</a></li>
+  <li><a href="#api-docs">API Documentation</a></li>
+  <li><a href="#auth">Authentication & Security</a></li>
+  <li><a href="#event-driven">Event-Driven Communication</a></li>
+  <li><a href="#python-service">Python Notification Service</a></li>
+  <li><a href="#frontend">Frontend Application</a></li>
+  <li><a href="#docker">Docker & Deployment</a></li>
+  <li><a href="#workflow">End-to-End Workflow</a></li>
+  <li><a href="#concurrency">Concurrency & Duplicate Prevention</a></li>
+  <li><a href="#setup">Setup Instructions</a></li>
+  <li><a href="#testing">Testing Guide</a></li>
+</ol>
+
+<!-- 1. ARCHITECTURE -->
+<div class="page-break"></div>
+<h1 id="architecture">1. Architecture Overview</h1>
+
+<h3>System Architecture Diagram</h3>
+<div class="arch-diagram">
+┌──────────────────────┐         ┌─────────────────────┐         ┌──────────────────────┐
+│                      │  HTTP   │                     │ AMQP    │                      │
+│   React Frontend     │────────▶│   Spring Boot API   │────────▶│     RabbitMQ          │
+│   (Vite + TS)        │         │   (Port 8080)       │         │   (Port 5672)         │
+│   Port 3000          │         │                     │         │   Mgmt: 15672         │
+│                      │         │   ┌───────────┐     │         └──────────┬─────────────┘
+└──────────────────────┘         │   │  H2 DB    │     │                    │
+                                 │   │  (File)   │     │                    │ Consume
+                                 │   └───────────┘     │                    ▼
+                                 └─────────────────────┘         ┌──────────────────────┐
+                                          ▲                      │                      │
+                                          │  PUT /api/internal   │  Python Notification │
+                                          │  (status callback)   │  Service             │
+                                          └──────────────────────│  (Consumer)          │
+                                                                 │                      │
+                                                                 └──────────────────────┘
+</div>
+
+<h3>Service Communication</h3>
+<table>
+  <tr><th>From</th><th>To</th><th>Protocol</th><th>Purpose</th></tr>
+  <tr><td>Frontend</td><td>Backend</td><td>REST/HTTP</td><td>User actions (auth, booking, queries)</td></tr>
+  <tr><td>Backend</td><td>RabbitMQ</td><td>AMQP</td><td>Publish appointment events</td></tr>
+  <tr><td>RabbitMQ</td><td>Python Service</td><td>AMQP</td><td>Deliver events for processing</td></tr>
+  <tr><td>Python Service</td><td>Backend</td><td>REST/HTTP</td><td>Update appointment status (callback)</td></tr>
+</table>
+
+<h3>Design Principles</h3>
+<ul>
+  <li><strong>Event-Driven Architecture</strong> — Loose coupling between services via message broker</li>
+  <li><strong>Stateless Authentication</strong> — JWT tokens, no server-side sessions</li>
+  <li><strong>Layered Architecture</strong> — Controller → Service → Repository pattern</li>
+  <li><strong>Single Responsibility</strong> — Each service has one clear purpose</li>
+  <li><strong>Fail-Safe Messaging</strong> — Durable queues, manual ACK, retry logic</li>
+</ul>
+
+<!-- 2. TECH STACK -->
+<div class="page-break"></div>
+<h1 id="tech-stack">2. Technology Stack</h1>
+
+<table>
+  <tr><th>Layer</th><th>Technology</th><th>Version</th><th>Purpose</th></tr>
+  <tr><td>Backend Core</td><td>Spring Boot</td><td>3.2.5</td><td>REST API, business logic, security</td></tr>
+  <tr><td>Language (Backend)</td><td>Java</td><td>17</td><td>Backend programming language</td></tr>
+  <tr><td>Worker Service</td><td>Python</td><td>3.11</td><td>Notification processing</td></tr>
+  <tr><td>Database</td><td>H2</td><td>2.x</td><td>Relational DB (file-based persistent)</td></tr>
+  <tr><td>ORM</td><td>Spring Data JPA / Hibernate</td><td>6.x</td><td>Object-relational mapping</td></tr>
+  <tr><td>Messaging</td><td>RabbitMQ</td><td>3.x</td><td>Event-driven message broker</td></tr>
+  <tr><td>Auth</td><td>JWT (jjwt)</td><td>0.12.5</td><td>Token-based authentication</td></tr>
+  <tr><td>API Docs</td><td>SpringDoc OpenAPI</td><td>2.5.0</td><td>Swagger UI auto-generation</td></tr>
+  <tr><td>Frontend</td><td>React + Vite</td><td>18.3 / 5.3</td><td>Single-page application</td></tr>
+  <tr><td>Frontend Language</td><td>TypeScript</td><td>5.4</td><td>Type-safe frontend code</td></tr>
+  <tr><td>CSS Framework</td><td>Tailwind CSS</td><td>3.4</td><td>Utility-first styling</td></tr>
+  <tr><td>HTTP Client</td><td>Axios</td><td>1.7</td><td>REST API calls from frontend</td></tr>
+  <tr><td>Routing</td><td>React Router</td><td>6.23</td><td>Client-side routing / SPA</td></tr>
+  <tr><td>Containerization</td><td>Docker + Compose</td><td>Latest</td><td>Multi-service orchestration</td></tr>
+  <tr><td>Web Server</td><td>Nginx</td><td>Alpine</td><td>Frontend static file server + API proxy</td></tr>
+  <tr><td>Python Libraries</td><td>pika, requests</td><td>1.3 / 2.31</td><td>RabbitMQ client, HTTP client</td></tr>
+</table>
+
+<!-- 3. PROJECT STRUCTURE -->
+<div class="page-break"></div>
+<h1 id="project-structure">3. Project Structure</h1>
+
+<pre><code>healthcare-appointment-platform/
+├── docker-compose.yml              # Orchestrates all 4 services
+├── .env                            # Environment variables
+├── .gitignore                      # Git ignore rules
+├── README.md                       # Project overview
+│
+├── backend/                        # ☕ Spring Boot Service
+│   ├── Dockerfile                  # Multi-stage Maven build
+│   ├── pom.xml                     # Maven dependencies
+│   └── src/main/
+│       ├── java/com/healthcare/
+│       │   ├── HealthcareApplication.java    # Entry point
+│       │   ├── config/
+│       │   │   ├── SecurityConfig.java       # Spring Security + CORS
+│       │   │   ├── RabbitMQConfig.java       # Exchange, queues, bindings
+│       │   │   └── SwaggerConfig.java        # OpenAPI configuration
+│       │   ├── controller/
+│       │   │   ├── AuthController.java       # POST /api/auth/*
+│       │   │   ├── AppointmentController.java # CRUD appointments
+│       │   │   ├── SlotController.java       # GET slots/doctors
+│       │   │   └── InternalController.java   # Status callback endpoint
+│       │   ├── dto/
+│       │   │   ├── RegisterRequest.java      # Registration payload
+│       │   │   ├── LoginRequest.java         # Login payload
+│       │   │   ├── AuthResponse.java         # JWT + user info
+│       │   │   ├── AppointmentRequest.java   # Booking payload
+│       │   │   ├── AppointmentResponse.java  # Appointment details
+│       │   │   ├── SlotResponse.java         # Slot details
+│       │   │   └── ApiResponse.java          # Unified response wrapper
+│       │   ├── model/
+│       │   │   ├── User.java                 # User entity
+│       │   │   ├── Doctor.java               # Doctor entity
+│       │   │   ├── Slot.java                 # Time slot entity
+│       │   │   ├── Appointment.java          # Appointment entity
+│       │   │   ├── AppointmentStatus.java    # Status enum
+│       │   │   └── AppointmentLog.java       # Audit log entity
+│       │   ├── repository/
+│       │   │   ├── UserRepository.java
+│       │   │   ├── DoctorRepository.java
+│       │   │   ├── SlotRepository.java
+│       │   │   ├── AppointmentRepository.java
+│       │   │   └── AppointmentLogRepository.java
+│       │   ├── security/
+│       │   │   ├── JwtUtil.java              # Token generation/validation
+│       │   │   ├── JwtAuthFilter.java        # Request filter
+│       │   │   └── UserDetailsServiceImpl.java
+│       │   ├── service/
+│       │   │   ├── AuthService.java          # Register/login logic
+│       │   │   ├── AppointmentService.java   # Booking/cancel logic
+│       │   │   ├── SlotService.java          # Slot queries
+│       │   │   └── EventPublisherService.java # RabbitMQ publishing
+│       │   └── exception/
+│       │       └── GlobalExceptionHandler.java
+│       └── resources/
+│           ├── application.yml               # App configuration
+│           └── data.sql                      # Seed data (doctors + slots)
+│
+├── notification-service/           # 🐍 Python Worker
+│   ├── Dockerfile                  # Python 3.11 slim
+│   ├── requirements.txt            # pika, requests
+│   ├── main.py                     # Entry point + RabbitMQ consumer
+│   ├── notification_handler.py     # Email simulation logic
+│   └── callback_client.py          # REST callback to Spring Boot
+│
+├── frontend/                       # ⚛️ React + Vite
+│   ├── Dockerfile                  # Multi-stage Node + Nginx
+│   ├── nginx.conf                  # SPA routing + API proxy
+│   ├── package.json                # Dependencies
+│   ├── vite.config.ts              # Vite config with API proxy
+│   ├── tsconfig.json               # TypeScript config
+│   ├── tailwind.config.js          # Tailwind CSS config
+│   ├── postcss.config.js           # PostCSS config
+│   ├── index.html                  # HTML entry point
+│   └── src/
+│       ├── main.tsx                # React entry point
+│       ├── App.tsx                 # Routes + layout
+│       ├── index.css               # Tailwind imports
+│       ├── api/
+│       │   └── client.ts           # Axios + JWT interceptor
+│       ├── context/
+│       │   └── AuthContext.tsx      # Auth state management
+│       ├── components/
+│       │   ├── Navbar.tsx           # Navigation bar
+│       │   └── StatusBadge.tsx      # Appointment status badge
+│       └── pages/
+│           ├── Login.tsx            # Login form
+│           ├── Register.tsx         # Registration form
+│           ├── Dashboard.tsx        # Overview + stats
+│           ├── BookAppointment.tsx  # 4-step booking wizard
+│           └── MyAppointments.tsx   # List + cancel
+│
+└── docs/
+    └── Healthcare-Platform-Documentation.html  # This document
+</code></pre>
+
+<!-- 4. DATABASE SCHEMA -->
+<div class="page-break"></div>
+<h1 id="database">4. Database Schema</h1>
+
+<h3>Entity Relationship</h3>
+<div class="arch-diagram">
+┌──────────┐     ┌──────────────┐     ┌──────────┐
+│  users   │     │ appointments │     │ doctors  │
+├──────────┤     ├──────────────┤     ├──────────┤
+│ id (PK)  │◀────│ patient_id   │     │ id (PK)  │
+│ email    │     │ doctor_id    │────▶│ name     │
+│ password │     │ slot_id (UQ) │     │ special. │
+│ full_name│     │ status       │     └──────────┘
+│ role     │     │ version      │          │
+│ created  │     │ created_at   │     ┌──────────┐
+└──────────┘     │ updated_at   │     │  slots   │
+                 └──────┬───────┘     ├──────────┤
+                        │             │ id (PK)  │
+                 ┌──────▼───────┐     │ doctor_id│
+                 │  appt_logs   │     │ date     │
+                 ├──────────────┤     │ start    │
+                 │ id (PK)      │     │ end      │
+                 │ appt_id (FK) │     │ available│
+                 │ old_status   │     └──────────┘
+                 │ new_status   │
+                 │ changed_at   │
+                 │ changed_by   │
+                 └──────────────┘
+</div>
+
+<h3>Table: <code>users</code></h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT</td><td>PK, AUTO_INCREMENT</td><td>Unique identifier</td></tr>
+  <tr><td>email</td><td>VARCHAR(255)</td><td>NOT NULL, UNIQUE</td><td>Login email</td></tr>
+  <tr><td>password</td><td>VARCHAR(255)</td><td>NOT NULL</td><td>BCrypt hashed password</td></tr>
+  <tr><td>full_name</td><td>VARCHAR(255)</td><td>NOT NULL</td><td>User's display name</td></tr>
+  <tr><td>role</td><td>VARCHAR(20)</td><td>NOT NULL</td><td>PATIENT or DOCTOR</td></tr>
+  <tr><td>created_at</td><td>TIMESTAMP</td><td>NOT NULL</td><td>Registration timestamp</td></tr>
+</table>
+
+<h3>Table: <code>doctors</code></h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT</td><td>PK, AUTO_INCREMENT</td><td>Unique identifier</td></tr>
+  <tr><td>name</td><td>VARCHAR(255)</td><td>NOT NULL</td><td>Doctor's full name</td></tr>
+  <tr><td>specialization</td><td>VARCHAR(255)</td><td>NOT NULL</td><td>Medical specialty</td></tr>
+</table>
+
+<h3>Table: <code>slots</code></h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT</td><td>PK, AUTO_INCREMENT</td><td>Unique identifier</td></tr>
+  <tr><td>doctor_id</td><td>BIGINT</td><td>FK → doctors(id), NOT NULL</td><td>Owning doctor</td></tr>
+  <tr><td>date</td><td>DATE</td><td>NOT NULL</td><td>Appointment date</td></tr>
+  <tr><td>start_time</td><td>TIME</td><td>NOT NULL</td><td>Slot start time</td></tr>
+  <tr><td>end_time</td><td>TIME</td><td>NOT NULL</td><td>Slot end time</td></tr>
+  <tr><td>is_available</td><td>BOOLEAN</td><td>NOT NULL, DEFAULT true</td><td>Whether slot is free</td></tr>
+</table>
+
+<h3>Table: <code>appointments</code></h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT</td><td>PK, AUTO_INCREMENT</td><td>Unique identifier</td></tr>
+  <tr><td>patient_id</td><td>BIGINT</td><td>FK → users(id), NOT NULL</td><td>Booking patient</td></tr>
+  <tr><td>doctor_id</td><td>BIGINT</td><td>FK → doctors(id), NOT NULL</td><td>Assigned doctor</td></tr>
+  <tr><td>slot_id</td><td>BIGINT</td><td>FK → slots(id), UNIQUE, NOT NULL</td><td>Booked time slot (prevents duplicates)</td></tr>
+  <tr><td>status</td><td>VARCHAR(30)</td><td>NOT NULL</td><td>Current appointment status</td></tr>
+  <tr><td>created_at</td><td>TIMESTAMP</td><td>NOT NULL</td><td>Booking timestamp</td></tr>
+  <tr><td>updated_at</td><td>TIMESTAMP</td><td></td><td>Last status update</td></tr>
+  <tr><td>version</td><td>INTEGER</td><td></td><td>Optimistic lock version</td></tr>
+</table>
+
+<h3>Table: <code>appointment_logs</code></h3>
+<table>
+  <tr><th>Column</th><th>Type</th><th>Constraints</th><th>Description</th></tr>
+  <tr><td>id</td><td>BIGINT</td><td>PK, AUTO_INCREMENT</td><td>Unique identifier</td></tr>
+  <tr><td>appointment_id</td><td>BIGINT</td><td>FK → appointments(id), NOT NULL</td><td>Related appointment</td></tr>
+  <tr><td>old_status</td><td>VARCHAR(30)</td><td></td><td>Previous status (null for creation)</td></tr>
+  <tr><td>new_status</td><td>VARCHAR(30)</td><td>NOT NULL</td><td>New status</td></tr>
+  <tr><td>changed_at</td><td>TIMESTAMP</td><td>NOT NULL</td><td>When change occurred</td></tr>
+  <tr><td>changed_by</td><td>VARCHAR(50)</td><td>NOT NULL</td><td>Who changed: user / notification-service</td></tr>
+</table>
+
+<h3>Appointment Status Flow</h3>
+<p>
+  <span class="flow-step" style="background:#dbeafe;">CONFIRMED</span>
+  <span class="arrow">→</span>
+  <span class="flow-step" style="background:#ede9fe;">NOTIFICATION_SENDING</span>
+  <span class="arrow">→</span>
+  <span class="flow-step" style="background:#d1fae5;">NOTIFICATION_SENT</span>
+</p>
+<p>
+  <span class="flow-step" style="background:#dbeafe;">CONFIRMED</span>
+  <span class="arrow">→</span>
+  <span class="flow-step" style="background:#fee2e2;">CANCELLED</span>
+</p>
+
+<h3>Seed Data</h3>
+<table>
+  <tr><th>Doctor</th><th>Specialization</th><th>Slots per Day</th></tr>
+  <tr><td>Dr. Sarah Johnson</td><td>Cardiology</td><td>7 (morning + afternoon)</td></tr>
+  <tr><td>Dr. Michael Chen</td><td>Dermatology</td><td>6 (morning + afternoon)</td></tr>
+  <tr><td>Dr. Emily Williams</td><td>Orthopedics</td><td>5 (morning + afternoon)</td></tr>
+  <tr><td>Dr. James Brown</td><td>General Medicine</td><td>8 (morning + afternoon)</td></tr>
+</table>
+<p>All slots are 30-minute intervals. Seed data covers today and tomorrow.</p>
+
+<!-- 5. API DOCUMENTATION -->
+<div class="page-break"></div>
+<h1 id="api-docs">5. API Documentation</h1>
+
+<div class="info-box">
+  <strong>Live Swagger UI:</strong> <code>http://localhost:8080/swagger-ui.html</code><br>
+  <strong>OpenAPI JSON:</strong> <code>http://localhost:8080/api-docs</code>
+</div>
+
+<h2>5.1 Authentication Endpoints</h2>
+
+<h3><span class="badge badge-green">POST</span> <code>/api/auth/register</code></h3>
+<p>Register a new patient account.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code>{
+  "fullName": "John Doe",
+  "email": "john@example.com",
+  "password": "password123"
+}</code></pre>
+<p><strong>Validation Rules:</strong></p>
+<ul>
+  <li><code>fullName</code> — Required, non-blank</li>
+  <li><code>email</code> — Required, valid email format, must be unique</li>
+  <li><code>password</code> — Required, minimum 6 characters</li>
+</ul>
+<p><strong>Success Response (200):</strong></p>
+<pre><code>{
+  "success": true,
+  "message": "Registration successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzM4NCJ9...",
+    "email": "john@example.com",
+    "fullName": "John Doe"
+  }
+}</code></pre>
+<p><strong>Error Response (400):</strong></p>
+<pre><code>{
+  "success": false,
+  "message": "Email already registered",
+  "data": null
+}</code></pre>
+
+<h3><span class="badge badge-green">POST</span> <code>/api/auth/login</code></h3>
+<p>Login with email and password.</p>
+<p><strong>Request Body:</strong></p>
+<pre><code>{
+  "email": "john@example.com",
+  "password": "password123"
+}</code></pre>
+<p><strong>Success Response (200):</strong></p>
+<pre><code>{
+  "success": true,
+  "message": "Login successful",
+  "data": {
+    "token": "eyJhbGciOiJIUzM4NCJ9...",
+    "email": "john@example.com",
+    "fullName": "John Doe"
+  }
+}</code></pre>
+<p><strong>Error Response (401):</strong></p>
+<pre><code>{
+  "success": false,
+  "message": "Invalid email or password",
+  "data": null
+}</code></pre>
+
+<h2>5.2 Appointment Endpoints <span class="badge badge-yellow">Requires JWT</span></h2>
+
+<h3><span class="badge badge-green">POST</span> <code>/api/appointments</code></h3>
+<p>Book a new appointment.</p>
+<p><strong>Headers:</strong> <code>Authorization: Bearer &lt;JWT_TOKEN&gt;</code></p>
+<p><strong>Request Body:</strong></p>
+<pre><code>{
+  "slotId": 5
+}</code></pre>
+<p><strong>Success Response (200):</strong></p>
+<pre><code>{
+  "success": true,
+  "message": "Appointment booked successfully",
+  "data": {
+    "id": 1,
+    "doctorName": "Dr. Sarah Johnson",
+    "specialization": "Cardiology",
+    "date": "2026-05-23",
+    "startTime": "09:00:00",
+    "endTime": "09:30:00",
+    "status": "CONFIRMED",
+    "createdAt": "2026-05-23T10:15:30",
+    "updatedAt": "2026-05-23T10:15:30"
+  }
+}</code></pre>
+<p><strong>Error Responses:</strong></p>
+<table>
+  <tr><th>Code</th><th>Message</th><th>Cause</th></tr>
+  <tr><td>400</td><td>Slot not found</td><td>Invalid slotId</td></tr>
+  <tr><td>409</td><td>Slot is no longer available</td><td>Slot already booked</td></tr>
+  <tr><td>409</td><td>Slot is already booked</td><td>Duplicate booking attempt</td></tr>
+  <tr><td>409</td><td>Concurrent modification detected</td><td>Optimistic lock failure</td></tr>
+</table>
+
+<h3><span class="badge badge-blue">GET</span> <code>/api/appointments</code></h3>
+<p>Get all appointments for the authenticated user.</p>
+<p><strong>Headers:</strong> <code>Authorization: Bearer &lt;JWT_TOKEN&gt;</code></p>
+<p><strong>Success Response (200):</strong></p>
+<pre><code>{
+  "success": true,
+  "message": "Appointments retrieved",
+  "data": [
+    {
+      "id": 1,
+      "doctorName": "Dr. Sarah Johnson",
+      "specialization": "Cardiology",
+      "date": "2026-05-23",
+      "startTime": "09:00:00",
+      "endTime": "09:30:00",
+      "status": "NOTIFICATION_SENT",
+      "createdAt": "2026-05-23T10:15:30",
+      "updatedAt": "2026-05-23T10:15:35"
+    }
+  ]
+}</code></pre>
+
+<h3><span class="badge badge-red">DELETE</span> <code>/api/appointments/{id}</code></h3>
+<p>Cancel an appointment (only the owning patient can cancel).</p>
+<p><strong>Headers:</strong> <code>Authorization: Bearer &lt;JWT_TOKEN&gt;</code></p>
+<p><strong>Path Parameter:</strong> <code>id</code> — Appointment ID</p>
+<p><strong>Success Response (200):</strong></p>
+<pre><code>{
+  "success": true,
+  "message": "Appointment cancelled successfully",
+  "data": null
+}</code></pre>
+<p><strong>Error Responses:</strong></p>
+<table>
+  <tr><th>Code</th><th>Message</th><th>Cause</th></tr>
+  <tr><td>400</td><td>Appointment not found</td><td>Invalid ID</td></tr>
+  <tr><td>403</td><td>You can only cancel your own appointments</td><td>Ownership violation</td></tr>
+  <tr><td>409</td><td>Appointment is already cancelled</td><td>Already cancelled</td></tr>
+</table>
+
+<h2>5.3 Slot & Doctor Endpoints <span class="badge badge-yellow">Requires JWT</span></h2>
+
+<h3><span class="badge badge-blue">GET</span> <code>/api/slots?doctorId={id}&amp;date={date}</code></h3>
+<p>Get available slots for a specific doctor on a specific date.</p>
+<p><strong>Query Parameters:</strong></p>
+<table>
+  <tr><th>Parameter</th><th>Type</th><th>Example</th><th>Description</th></tr>
+  <tr><td>doctorId</td><td>Long</td><td>1</td><td>Doctor ID</td></tr>
+  <tr><td>date</td><td>ISO Date</td><td>2026-05-23</td><td>Date to query</td></tr>
+</table>
+<p><strong>Success Response (200):</strong></p>
+<pre><code>{
+  "success": true,
+  "message": "Available slots retrieved",
+  "data": [
+    {
+      "id": 1,
+      "doctorId": 1,
+      "doctorName": "Dr. Sarah Johnson",
+      "specialization": "Cardiology",
+      "date": "2026-05-23",
+      "startTime": "09:00:00",
+      "endTime": "09:30:00",
+      "available": true
+    }
+  ]
+}</code></pre>
+
+<h3><span class="badge badge-blue">GET</span> <code>/api/slots/doctors</code></h3>
+<p>Get all available doctors.</p>
+<p><strong>Success Response (200):</strong></p>
+<pre><code>{
+  "success": true,
+  "message": "Doctors retrieved",
+  "data": [
+    { "id": 1, "name": "Dr. Sarah Johnson", "specialization": "Cardiology" },
+    { "id": 2, "name": "Dr. Michael Chen", "specialization": "Dermatology" }
+  ]
+}</code></pre>
+
+<h2>5.4 Internal Endpoints <span class="badge badge-purple">Service-to-Service</span></h2>
+
+<h3><span class="badge badge-yellow">PUT</span> <code>/api/internal/appointments/{id}/status</code></h3>
+<p>Update appointment status (called by Python notification service).</p>
+<p><strong>Headers:</strong> <code>X-Internal-Key: internal-service-key-2024</code></p>
+<p><strong>Request Body:</strong></p>
+<pre><code>{
+  "status": "NOTIFICATION_SENT"
+}</code></pre>
+<p><strong>Authentication:</strong> Shared API key via <code>X-Internal-Key</code> header. Returns 403 if key is invalid.</p>
+
+<!-- 6. AUTHENTICATION -->
+<div class="page-break"></div>
+<h1 id="auth">6. Authentication & Security</h1>
+
+<h3>JWT Authentication Flow</h3>
+<div class="arch-diagram">
+1. Client sends POST /api/auth/login with {email, password}
+2. Server validates credentials via AuthenticationManager + BCrypt
+3. Server generates JWT token (HS384, 24h expiry)
+4. Client stores token in localStorage
+5. Client sends token in every request: Authorization: Bearer &lt;token&gt;
+6. JwtAuthFilter intercepts request, validates token, sets SecurityContext
+7. Controller method accesses user via Authentication parameter
+</div>
+
+<h3>Security Configuration</h3>
+<table>
+  <tr><th>Feature</th><th>Implementation</th></tr>
+  <tr><td>Password Hashing</td><td>BCrypt (Spring Security default)</td></tr>
+  <tr><td>Token Algorithm</td><td>HMAC-SHA384 via jjwt library</td></tr>
+  <tr><td>Token Expiry</td><td>24 hours (86400000 ms)</td></tr>
+  <tr><td>Session Management</td><td>Stateless (no server-side sessions)</td></tr>
+  <tr><td>CORS</td><td>Allowed origins: localhost:3000, localhost:5173</td></tr>
+  <tr><td>CSRF</td><td>Disabled (stateless API with JWT)</td></tr>
+  <tr><td>Service-to-Service</td><td>Shared API key via X-Internal-Key header</td></tr>
+</table>
+
+<h3>Public vs Protected Endpoints</h3>
+<table>
+  <tr><th>Endpoint Pattern</th><th>Access</th></tr>
+  <tr><td><code>/api/auth/**</code></td><td>🟢 Public</td></tr>
+  <tr><td><code>/api/internal/**</code></td><td>🟢 Public (but API-key protected)</td></tr>
+  <tr><td><code>/swagger-ui/**</code></td><td>🟢 Public</td></tr>
+  <tr><td><code>/h2-console/**</code></td><td>🟢 Public</td></tr>
+  <tr><td><code>/actuator/**</code></td><td>🟢 Public</td></tr>
+  <tr><td>All other endpoints</td><td>🔴 JWT Required</td></tr>
+</table>
+
+<h3>Security Measures</h3>
+<ul>
+  <li><strong>SQL Injection Prevention</strong> — JPA parameterized queries, no raw SQL</li>
+  <li><strong>Input Validation</strong> — Bean validation annotations on all DTOs (@NotBlank, @Email, @Size)</li>
+  <li><strong>Authorization</strong> — Users can only access/cancel their own appointments</li>
+  <li><strong>Exception Handling</strong> — GlobalExceptionHandler prevents stack trace leakage</li>
+  <li><strong>Password Security</strong> — Never returned in API responses</li>
+</ul>
+
+<!-- 7. EVENT-DRIVEN -->
+<div class="page-break"></div>
+<h1 id="event-driven">7. Event-Driven Communication</h1>
+
+<h3>RabbitMQ Configuration</h3>
+<table>
+  <tr><th>Component</th><th>Name</th><th>Type</th></tr>
+  <tr><td>Exchange</td><td><code>appointment.events</code></td><td>Topic Exchange (durable)</td></tr>
+  <tr><td>Queue</td><td><code>appointment.created.queue</code></td><td>Durable Queue</td></tr>
+  <tr><td>Queue</td><td><code>appointment.cancelled.queue</code></td><td>Durable Queue</td></tr>
+  <tr><td>Routing Key</td><td><code>appointment.created</code></td><td>Binds to created queue</td></tr>
+  <tr><td>Routing Key</td><td><code>appointment.cancelled</code></td><td>Binds to cancelled queue</td></tr>
+</table>
+
+<h3>Event Payload</h3>
+<pre><code>{
+  "eventType": "APPOINTMENT_CREATED",       // or "APPOINTMENT_CANCELLED"
+  "appointmentId": 1,
+  "patientName": "John Doe",
+  "patientEmail": "john@example.com",
+  "doctorName": "Dr. Sarah Johnson",
+  "date": "2026-05-23",
+  "startTime": "09:00",
+  "endTime": "09:30",
+  "timestamp": "2026-05-23T10:15:30"
+}</code></pre>
+
+<h3>Message Flow</h3>
+<div class="arch-diagram">
+Spring Boot                    RabbitMQ                     Python Service
+    │                              │                              │
+    │  1. Publish event            │                              │
+    │─────────────────────────────▶│                              │
+    │  (JSON via Jackson2Json)     │                              │
+    │                              │  2. Deliver to consumer      │
+    │                              │─────────────────────────────▶│
+    │                              │  (manual ACK, prefetch=1)    │
+    │                              │                              │
+    │                              │                              │ 3. Process event
+    │                              │                              │    (simulate email)
+    │                              │                              │
+    │  4. Status callback          │                              │
+    │◀─────────────────────────────│──────────────────────────────│
+    │  PUT /api/internal/...       │                              │
+    │  (X-Internal-Key auth)       │                              │
+    │                              │                              │
+    │                              │  5. ACK message              │
+    │                              │◀─────────────────────────────│
+    │                              │                              │
+</div>
+
+<h3>Reliability Features</h3>
+<ul>
+  <li><strong>Durable Queues</strong> — Messages survive RabbitMQ restart</li>
+  <li><strong>Manual ACK</strong> — Messages only removed after successful processing</li>
+  <li><strong>NACK + Requeue</strong> — Failed messages are requeued for retry</li>
+  <li><strong>Prefetch Count = 1</strong> — Process one message at a time</li>
+  <li><strong>Connection Retry</strong> — Python service retries connection up to 10 times</li>
+  <li><strong>JSON Serialization</strong> — Jackson2JsonMessageConverter for type-safe messaging</li>
+</ul>
+
+<!-- 8. PYTHON SERVICE -->
+<div class="page-break"></div>
+<h1 id="python-service">8. Python Notification Service</h1>
+
+<h3>Architecture</h3>
+<table>
+  <tr><th>File</th><th>Purpose</th></tr>
+  <tr><td><code>main.py</code></td><td>Entry point, RabbitMQ connection + consumer loop</td></tr>
+  <tr><td><code>notification_handler.py</code></td><td>Event processing, email simulation</td></tr>
+  <tr><td><code>callback_client.py</code></td><td>REST client to update appointment status</td></tr>
+</table>
+
+<h3>Processing Pipeline</h3>
+<ol>
+  <li>Receive message from RabbitMQ queue</li>
+  <li>Parse JSON payload</li>
+  <li>Call Spring Boot API: status → <code>NOTIFICATION_SENDING</code></li>
+  <li>Process event:
+    <ul>
+      <li><strong>APPOINTMENT_CREATED</strong> → Log formatted booking confirmation email</li>
+      <li><strong>APPOINTMENT_CANCELLED</strong> → Log formatted cancellation notice</li>
+    </ul>
+  </li>
+  <li>Simulate email sending delay (2 seconds)</li>
+  <li>Call Spring Boot API: status → <code>NOTIFICATION_SENT</code></li>
+  <li>ACK the RabbitMQ message</li>
+</ol>
+
+<h3>Simulated Email Output</h3>
+<pre><code>============================================================
+SENDING EMAIL NOTIFICATION - Appointment Confirmation
+============================================================
+  To: john@example.com
+  Subject: Appointment Confirmation - #1
+  ---
+  Dear John Doe,
+
+  Your appointment has been confirmed!
+
+  Details:
+    Doctor: Dr. Sarah Johnson
+    Date: 2026-05-23
+    Time: 09:00 - 09:30
+    Appointment ID: #1
+
+  Please arrive 10 minutes early.
+
+  Best regards,
+  Healthcare Platform Team
+============================================================</code></pre>
+
+<h3>Error Handling</h3>
+<ul>
+  <li>Messages that fail processing are NACKed and requeued</li>
+  <li>Connection failures trigger automatic retry (10 attempts, 5s delay)</li>
+  <li>HTTP callback failures are logged but don't block message processing</li>
+  <li>Graceful shutdown on KeyboardInterrupt (SIGINT)</li>
+</ul>
+
+<h3>Environment Variables</h3>
+<table>
+  <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
+  <tr><td>RABBITMQ_HOST</td><td>localhost</td><td>RabbitMQ hostname</td></tr>
+  <tr><td>RABBITMQ_PORT</td><td>5672</td><td>RabbitMQ port</td></tr>
+  <tr><td>RABBITMQ_USER</td><td>guest</td><td>RabbitMQ username</td></tr>
+  <tr><td>RABBITMQ_PASS</td><td>guest</td><td>RabbitMQ password</td></tr>
+  <tr><td>BACKEND_URL</td><td>http://localhost:8080</td><td>Spring Boot base URL</td></tr>
+  <tr><td>INTERNAL_API_KEY</td><td>internal-service-key-2024</td><td>Service-to-service auth key</td></tr>
+</table>
+
+<!-- 9. FRONTEND -->
+<div class="page-break"></div>
+<h1 id="frontend">9. Frontend Application</h1>
+
+<h3>Pages Overview</h3>
+<table>
+  <tr><th>Route</th><th>Component</th><th>Auth</th><th>Description</th></tr>
+  <tr><td><code>/login</code></td><td>Login.tsx</td><td>Public</td><td>Email/password login form</td></tr>
+  <tr><td><code>/register</code></td><td>Register.tsx</td><td>Public</td><td>New patient registration</td></tr>
+  <tr><td><code>/</code></td><td>Dashboard.tsx</td><td>Protected</td><td>Stats + recent appointments</td></tr>
+  <tr><td><code>/book</code></td><td>BookAppointment.tsx</td><td>Protected</td><td>4-step booking wizard</td></tr>
+  <tr><td><code>/appointments</code></td><td>MyAppointments.tsx</td><td>Protected</td><td>Full appointment list + cancel</td></tr>
+</table>
+
+<h3>Booking Flow (4 Steps)</h3>
+<table>
+  <tr><th>Step</th><th>Action</th><th>Visual Feedback</th></tr>
+  <tr><td>1</td><td>Select Doctor</td><td>Doctor cards with specialization</td></tr>
+  <tr><td>2</td><td>Choose Date</td><td>Next 7 days in grid</td></tr>
+  <tr><td>3</td><td>Pick Time Slot</td><td>Available 30-min slots + "Fetching slots..." indicator</td></tr>
+  <tr><td>4</td><td>Confirm Booking</td><td>Animated status: "Booking..." → "Booked!" → "Processing notification..." → "Done!"</td></tr>
+</table>
+
+<h3>Status Badge Colors</h3>
+<table>
+  <tr><th>Status</th><th>Label</th><th>Color</th><th>Animation</th></tr>
+  <tr><td>PENDING</td><td>Pending</td><td style="background:#fef3c7;">Yellow</td><td>None</td></tr>
+  <tr><td>CONFIRMED</td><td>Confirmed</td><td style="background:#dbeafe;">Blue</td><td>None</td></tr>
+  <tr><td>NOTIFICATION_SENDING</td><td>Processing...</td><td style="background:#ede9fe;">Purple</td><td>Spinning icon</td></tr>
+  <tr><td>NOTIFICATION_SENT</td><td>Completed</td><td style="background:#d1fae5;">Green</td><td>None</td></tr>
+  <tr><td>CANCELLED</td><td>Cancelled</td><td style="background:#fee2e2;">Red</td><td>None</td></tr>
+</table>
+
+<h3>Key Frontend Features</h3>
+<ul>
+  <li><strong>JWT Management</strong> — Token stored in localStorage, attached via Axios interceptor</li>
+  <li><strong>Auto-redirect on 401</strong> — Interceptor clears token and redirects to login</li>
+  <li><strong>Polling</strong> — Dashboard and Appointments pages poll every 3 seconds for status updates</li>
+  <li><strong>Protected Routes</strong> — PrivateRoute component redirects unauthenticated users to login</li>
+  <li><strong>Responsive Design</strong> — Tailwind CSS responsive grid (mobile-friendly)</li>
+</ul>
+
+<!-- 10. DOCKER -->
+<div class="page-break"></div>
+<h1 id="docker">10. Docker & Deployment</h1>
+
+<h3>Docker Services</h3>
+<table>
+  <tr><th>Service</th><th>Image</th><th>Port(s)</th><th>Depends On</th></tr>
+  <tr><td>rabbitmq</td><td>rabbitmq:3-management</td><td>5672, 15672</td><td>—</td></tr>
+  <tr><td>backend</td><td>Custom (Maven multi-stage)</td><td>8080</td><td>rabbitmq (healthy)</td></tr>
+  <tr><td>notification-service</td><td>Custom (Python slim)</td><td>—</td><td>rabbitmq (healthy), backend (healthy)</td></tr>
+  <tr><td>frontend</td><td>Custom (Node build + Nginx)</td><td>3000 → 80</td><td>backend</td></tr>
+</table>
+
+<h3>Docker Build Strategy</h3>
+<table>
+  <tr><th>Service</th><th>Build Stage</th><th>Runtime Stage</th><th>Size</th></tr>
+  <tr><td>Backend</td><td>maven:3.9-eclipse-temurin-17</td><td>eclipse-temurin:17-jre-alpine</td><td>~200MB</td></tr>
+  <tr><td>Frontend</td><td>node:20-alpine</td><td>nginx:alpine</td><td>~30MB</td></tr>
+  <tr><td>Notification</td><td>—</td><td>python:3.11-slim</td><td>~150MB</td></tr>
+</table>
+
+<h3>Health Checks</h3>
+<table>
+  <tr><th>Service</th><th>Check</th><th>Interval</th></tr>
+  <tr><td>RabbitMQ</td><td><code>rabbitmq-diagnostics check_port_connectivity</code></td><td>10s</td></tr>
+  <tr><td>Backend</td><td><code>curl -f http://localhost:8080/actuator/health</code></td><td>15s</td></tr>
+</table>
+
+<h3>Nginx Configuration (Frontend)</h3>
+<ul>
+  <li>Serves static React build files</li>
+  <li>SPA routing: all non-file routes fallback to <code>index.html</code></li>
+  <li>API proxy: <code>/api/*</code> → <code>http://backend:8080/api/*</code></li>
+  <li>Swagger proxy: <code>/swagger-ui/*</code> → backend</li>
+</ul>
+
+<h3>Environment Variables (.env)</h3>
+<pre><code>RABBITMQ_USER=guest
+RABBITMQ_PASS=guest
+JWT_SECRET=mySecretKey123456789012345678901234567890
+INTERNAL_API_KEY=internal-service-key-2024</code></pre>
+
+<!-- 11. WORKFLOW -->
+<div class="page-break"></div>
+<h1 id="workflow">11. End-to-End Workflow</h1>
+
+<h3>Complete Appointment Booking Flow</h3>
+<table>
+  <tr><th>#</th><th>Step</th><th>Service</th><th>Action</th></tr>
+  <tr><td>1</td><td>Register</td><td>Frontend → Backend</td><td>POST /api/auth/register → JWT issued</td></tr>
+  <tr><td>2</td><td>Login</td><td>Frontend → Backend</td><td>POST /api/auth/login → JWT issued</td></tr>
+  <tr><td>3</td><td>Browse Doctors</td><td>Frontend → Backend</td><td>GET /api/slots/doctors</td></tr>
+  <tr><td>4</td><td>View Slots</td><td>Frontend → Backend</td><td>GET /api/slots?doctorId=1&date=2026-05-23</td></tr>
+  <tr><td>5</td><td>Book Appointment</td><td>Frontend → Backend</td><td>POST /api/appointments {slotId: 5}</td></tr>
+  <tr><td>6</td><td>Persist</td><td>Backend → H2</td><td>Save appointment (CONFIRMED), mark slot unavailable</td></tr>
+  <tr><td>7</td><td>Log</td><td>Backend → H2</td><td>Insert appointment_log (null → CONFIRMED)</td></tr>
+  <tr><td>8</td><td>Publish Event</td><td>Backend → RabbitMQ</td><td>Send APPOINTMENT_CREATED to exchange</td></tr>
+  <tr><td>9</td><td>Consume Event</td><td>RabbitMQ → Python</td><td>Python receives message from queue</td></tr>
+  <tr><td>10</td><td>Update Status</td><td>Python → Backend</td><td>PUT status → NOTIFICATION_SENDING</td></tr>
+  <tr><td>11</td><td>Process</td><td>Python</td><td>Simulate email (log to console, 2s delay)</td></tr>
+  <tr><td>12</td><td>Update Status</td><td>Python → Backend</td><td>PUT status → NOTIFICATION_SENT</td></tr>
+  <tr><td>13</td><td>ACK</td><td>Python → RabbitMQ</td><td>Acknowledge message processing complete</td></tr>
+  <tr><td>14</td><td>Poll Status</td><td>Frontend → Backend</td><td>GET /api/appointments (every 3s) → UI updates</td></tr>
+</table>
+
+<h3>Cancel Flow</h3>
+<table>
+  <tr><th>#</th><th>Step</th><th>Service</th><th>Action</th></tr>
+  <tr><td>1</td><td>Cancel</td><td>Frontend → Backend</td><td>DELETE /api/appointments/1</td></tr>
+  <tr><td>2</td><td>Validate</td><td>Backend</td><td>Check ownership + not already cancelled</td></tr>
+  <tr><td>3</td><td>Update</td><td>Backend → H2</td><td>Status → CANCELLED, slot.available → true</td></tr>
+  <tr><td>4</td><td>Log</td><td>Backend → H2</td><td>Insert appointment_log</td></tr>
+  <tr><td>5</td><td>Publish</td><td>Backend → RabbitMQ</td><td>Send APPOINTMENT_CANCELLED event</td></tr>
+  <tr><td>6</td><td>Process</td><td>Python</td><td>Consume event, log cancellation email</td></tr>
+</table>
+
+<!-- 12. CONCURRENCY -->
+<div class="page-break"></div>
+<h1 id="concurrency">12. Concurrency & Duplicate Prevention</h1>
+
+<h3>Multi-Layer Protection</h3>
+<table>
+  <tr><th>Layer</th><th>Mechanism</th><th>Protection</th></tr>
+  <tr><td>Application</td><td><code>slot.isAvailable</code> check</td><td>First check — prevents most duplicates</td></tr>
+  <tr><td>Application</td><td><code>existsBySlotIdAndStatusNot(CANCELLED)</code></td><td>Secondary check in repository</td></tr>
+  <tr><td>Database</td><td><code>UNIQUE</code> constraint on <code>appointments.slot_id</code></td><td>Final guarantee — DB-enforced uniqueness</td></tr>
+  <tr><td>Application</td><td><code>@Version</code> on Appointment entity</td><td>Optimistic locking for concurrent updates</td></tr>
+  <tr><td>Transaction</td><td><code>@Transactional</code> on service methods</td><td>Atomic read-modify-write operations</td></tr>
+</table>
+
+<h3>Concurrent Booking Scenario</h3>
+<div class="arch-diagram">
+User A                        Server                        User B
+  │                              │                              │
+  │  POST /appointments          │         POST /appointments   │
+  │  {slotId: 5}                 │         {slotId: 5}          │
+  │─────────────────────────────▶│◀─────────────────────────────│
+  │                              │                              │
+  │              ┌───────────────┴───────────────┐              │
+  │              │  @Transactional                │              │
+  │              │  1. Check slot.isAvailable     │              │
+  │              │  2. Check existsBySlotId       │              │
+  │              │  3. Set slot.available=false   │              │
+  │              │  4. INSERT appointment         │              │
+  │              │                                │              │
+  │              │  Winner: First to INSERT wins  │              │
+  │              │  Loser:  UNIQUE violation      │              │
+  │              │          → 409 Conflict        │              │
+  │              └───────────────┬───────────────┘              │
+  │                              │                              │
+  │  200 OK: Booked!             │     409: Slot already booked │
+  │◀─────────────────────────────│─────────────────────────────▶│
+</div>
+
+<h3>Error Responses for Concurrency Issues</h3>
+<table>
+  <tr><th>Scenario</th><th>HTTP Status</th><th>Message</th></tr>
+  <tr><td>Slot already booked</td><td>409 Conflict</td><td>Slot is no longer available</td></tr>
+  <tr><td>DB unique constraint violation</td><td>409 Conflict</td><td>Duplicate booking or data conflict</td></tr>
+  <tr><td>Optimistic lock failure</td><td>409 Conflict</td><td>Concurrent modification detected. Please try again.</td></tr>
+</table>
+
+<!-- 13. SETUP -->
+<div class="page-break"></div>
+<h1 id="setup">13. Setup Instructions</h1>
+
+<h2>Option 1: Docker Compose (Recommended)</h2>
+<h4>Prerequisites</h4>
+<ul>
+  <li>Docker Desktop installed and running</li>
+</ul>
+<pre><code># 1. Clone the repository
+git clone &lt;repo-url&gt;
+cd healthcare-appointment-platform
+
+# 2. Start all services
+docker compose up --build
+
+# 3. Wait for all services to start (first build takes a few minutes)
+# Watch for: "Started HealthcareApplication" in backend logs
+#            "Notification service is ready" in Python logs
+
+# 4. Access the application
+# Frontend:  http://localhost:3000
+# Swagger:   http://localhost:8080/swagger-ui.html
+# RabbitMQ:  http://localhost:15672 (guest/guest)
+
+# 5. Stop services
+docker compose down</code></pre>
+
+<h2>Option 2: Local Development</h2>
+<h4>Prerequisites</h4>
+<ul>
+  <li>Java 17+ with Maven</li>
+  <li>Node.js 18+</li>
+  <li>Python 3.11+</li>
+  <li>RabbitMQ running on localhost:5672</li>
+</ul>
+
+<h4>Terminal 1: RabbitMQ</h4>
+<pre><code># Install and start RabbitMQ (varies by OS)
+# Windows: choco install rabbitmq
+# Mac: brew install rabbitmq && brew services start rabbitmq
+# Linux: sudo apt install rabbitmq-server && sudo systemctl start rabbitmq-server</code></pre>
+
+<h4>Terminal 2: Backend</h4>
+<pre><code>cd backend
+./mvnw spring-boot:run    # or: mvn spring-boot:run</code></pre>
+
+<h4>Terminal 3: Python Service</h4>
+<pre><code>cd notification-service
+pip install -r requirements.txt
+python main.py</code></pre>
+
+<h4>Terminal 4: Frontend</h4>
+<pre><code>cd frontend
+npm install
+npm run dev
+# Access at http://localhost:5173</code></pre>
+
+<h2>Access Points Summary</h2>
+<table>
+  <tr><th>Service</th><th>Docker URL</th><th>Local Dev URL</th></tr>
+  <tr><td>Frontend</td><td>http://localhost:3000</td><td>http://localhost:5173</td></tr>
+  <tr><td>Backend API</td><td>http://localhost:8080</td><td>http://localhost:8080</td></tr>
+  <tr><td>Swagger UI</td><td>http://localhost:8080/swagger-ui.html</td><td>http://localhost:8080/swagger-ui.html</td></tr>
+  <tr><td>RabbitMQ Mgmt</td><td>http://localhost:15672</td><td>http://localhost:15672</td></tr>
+  <tr><td>H2 Console</td><td>http://localhost:8080/h2-console</td><td>http://localhost:8080/h2-console</td></tr>
+</table>
+
+<h3>H2 Console Connection</h3>
+<table>
+  <tr><th>Field</th><th>Value</th></tr>
+  <tr><td>JDBC URL</td><td><code>jdbc:h2:file:./data/healthcaredb</code></td></tr>
+  <tr><td>Username</td><td><code>sa</code></td></tr>
+  <tr><td>Password</td><td><em>(empty)</em></td></tr>
+</table>
+
+<!-- 14. TESTING -->
+<div class="page-break"></div>
+<h1 id="testing">14. Testing Guide</h1>
+
+<h3>Manual Test Scenarios</h3>
+
+<h4>Test 1: User Registration & Login</h4>
+<ol>
+  <li>Open <code>http://localhost:3000</code></li>
+  <li>Click "Register" → fill in name, email, password → Submit</li>
+  <li>Verify: Redirected to Dashboard</li>
+  <li>Logout → Login with same credentials</li>
+  <li>Verify: Dashboard shows "Hello, [name]"</li>
+</ol>
+
+<h4>Test 2: Appointment Booking (Happy Path)</h4>
+<ol>
+  <li>Click "Book Appointment"</li>
+  <li>Select a doctor → Select today's date → Pick an available slot</li>
+  <li>Click "Confirm Booking"</li>
+  <li>Verify visual flow: "Booking appointment..." → "Appointment booked successfully!" → "Processing notification event..." → "All done!"</li>
+  <li>Click "View My Appointments" → Verify appointment appears with status progressing from CONFIRMED → NOTIFICATION_SENT</li>
+  <li>Check Python service logs for simulated email output</li>
+</ol>
+
+<h4>Test 3: Duplicate Booking Prevention</h4>
+<ol>
+  <li>Note the slot that was just booked</li>
+  <li>Try to book the same slot again (via another browser/API call)</li>
+  <li>Verify: Error "Slot is no longer available" (409 Conflict)</li>
+</ol>
+
+<h4>Test 4: Appointment Cancellation</h4>
+<ol>
+  <li>Go to "My Appointments"</li>
+  <li>Click "Cancel" on an active appointment → Confirm</li>
+  <li>Verify: Status changes to "Cancelled"</li>
+  <li>Verify: The slot becomes available again for new bookings</li>
+  <li>Check Python service logs for cancellation email</li>
+</ol>
+
+<h4>Test 5: Authorization</h4>
+<ol>
+  <li>Register a second user in a different browser/incognito</li>
+  <li>Try to cancel the first user's appointment via API</li>
+  <li>Verify: 403 "You can only cancel your own appointments"</li>
+</ol>
+
+<h4>Test 6: API via Swagger</h4>
+<ol>
+  <li>Open <code>http://localhost:8080/swagger-ui.html</code></li>
+  <li>Try register/login → Copy the JWT token</li>
+  <li>Click "Authorize" → Paste token</li>
+  <li>Test all endpoints directly</li>
+</ol>
+
+<h4>Test 7: RabbitMQ Monitoring</h4>
+<ol>
+  <li>Open <code>http://localhost:15672</code> (guest/guest)</li>
+  <li>Navigate to Queues tab</li>
+  <li>Verify: <code>appointment.created.queue</code> and <code>appointment.cancelled.queue</code> exist</li>
+  <li>Book an appointment → Watch message appear and get consumed</li>
+</ol>
+
+<h3>cURL Test Commands</h3>
+<pre><code># Register
+curl -X POST http://localhost:8080/api/auth/register \
+  -H "Content-Type: application/json" \
+  -d '{"fullName":"Test User","email":"test@example.com","password":"password123"}'
+
+# Login
+curl -X POST http://localhost:8080/api/auth/login \
+  -H "Content-Type: application/json" \
+  -d '{"email":"test@example.com","password":"password123"}'
+
+# Get Doctors (use token from login response)
+curl http://localhost:8080/api/slots/doctors \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Get Available Slots
+curl "http://localhost:8080/api/slots?doctorId=1&date=2026-05-23" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Book Appointment
+curl -X POST http://localhost:8080/api/appointments \
+  -H "Content-Type: application/json" \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN" \
+  -d '{"slotId": 1}'
+
+# Get My Appointments
+curl http://localhost:8080/api/appointments \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"
+
+# Cancel Appointment
+curl -X DELETE http://localhost:8080/api/appointments/1 \
+  -H "Authorization: Bearer YOUR_JWT_TOKEN"</code></pre>
+
+<hr>
+<p style="text-align:center;color:#6b7280;font-size:13px;margin-top:40px;">
+  Healthcare Appointment Platform Documentation v1.0 &bull; May 2026<br>
+  Spring Boot 3.2 &bull; Python 3.11 &bull; React 18 &bull; RabbitMQ &bull; Docker
+</p>
+
+</body>
+</html>
