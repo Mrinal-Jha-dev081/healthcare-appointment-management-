@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
 import java.util.HashMap;
@@ -23,14 +25,28 @@ public class EventPublisherService {
 
     public void publishAppointmentCreated(Appointment appointment) {
         Map<String, Object> event = buildEvent(appointment, "APPOINTMENT_CREATED");
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_CREATED, event);
-        log.info("Published APPOINTMENT_CREATED event for appointment {}", appointment.getId());
+        publishAfterCommit(EXCHANGE, ROUTING_KEY_CREATED, event, appointment.getId(), "APPOINTMENT_CREATED");
     }
 
     public void publishAppointmentCancelled(Appointment appointment) {
         Map<String, Object> event = buildEvent(appointment, "APPOINTMENT_CANCELLED");
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY_CANCELLED, event);
-        log.info("Published APPOINTMENT_CANCELLED event for appointment {}", appointment.getId());
+        publishAfterCommit(EXCHANGE, ROUTING_KEY_CANCELLED, event, appointment.getId(), "APPOINTMENT_CANCELLED");
+    }
+
+    private void publishAfterCommit(String exchange, String routingKey, Map<String, Object> event,
+                                    Long appointmentId, String eventType) {
+        if (TransactionSynchronizationManager.isSynchronizationActive()) {
+            TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+                @Override
+                public void afterCommit() {
+                    rabbitTemplate.convertAndSend(exchange, routingKey, event);
+                    log.info("Published {} event for appointment {} after transaction commit", eventType, appointmentId);
+                }
+            });
+        } else {
+            rabbitTemplate.convertAndSend(exchange, routingKey, event);
+            log.info("Published {} event for appointment {}", eventType, appointmentId);
+        }
     }
 
     private Map<String, Object> buildEvent(Appointment appointment, String eventType) {
